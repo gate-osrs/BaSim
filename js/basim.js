@@ -1,6 +1,8 @@
 import { mWAVE_1_TO_9, mWAVE10 } from './MapConstants.js';
 import { Runner } from './Runner.js';
 import { setPlayerPosition, addItem, resetMap } from './MapUtils.js';
+import { Canvas } from './Canvas.js';
+import * as Constants from './Constants.js';
 
 const HTML_CANVAS = 'basimcanvas';
 const HTML_RUNNER_MOVEMENTS = 'runnermovements';
@@ -9,6 +11,7 @@ const HTML_WAVE_SELECT = 'waveselect';
 const HTML_TICK_COUNT = 'tickcount';
 const HTML_DEF_LEVEL_SELECT = 'deflevelselect';
 window.onload = simInit;
+var canvasRenderer;
 
 function simInit() {
     window.settings = {
@@ -29,8 +32,8 @@ function simInit() {
     simDefLevelSelect = document.getElementById(HTML_DEF_LEVEL_SELECT);
     simDefLevelSelect.onchange = simDefLevelSelectOnChange;
     simTickCountSpan = document.getElementById(HTML_TICK_COUNT);
-    rInit(canvas, 64 * 12, 48 * 12);
-    rrInit(12);
+    // rInit(canvas, 64 * 12, 48 * 12);
+    canvasRenderer = new Canvas(canvas, 64 * 12, 48 * 12);
     mInit(mWAVE_1_TO_9, 64, 48);
     Runner.setSniffDistance(5);
     simReset();
@@ -157,9 +160,11 @@ function simWindowOnKeyDown(e) {
     }
 }
 function simCanvasOnMouseDown(e) {
-    var canvasRect = rCanvas.getBoundingClientRect();
-    let xTile = Math.trunc((e.clientX - canvasRect.left) / rrTileSize);
-    let yTile = Math.trunc((canvasRect.bottom - 1 - e.clientY) / rrTileSize);
+    var canvasRect = canvasRenderer.canvasEl.getBoundingClientRect();
+    let xTile = Math.trunc((e.clientX - canvasRect.left) / Constants.TILE_SIZE);
+    let yTile = Math.trunc(
+        (canvasRect.bottom - 1 - e.clientY) / Constants.TILE_SIZE
+    );
     if (e.button === 0) {
         plPathfind(xTile, yTile);
     } else if (e.button === 2) {
@@ -199,7 +204,7 @@ function simDraw() {
     plDrawPlayer();
     mDrawGrid();
     baDrawOverlays();
-    rPresent();
+    canvasRenderer.present();
 }
 var simTickTimerId;
 var simMovementsInput;
@@ -233,7 +238,7 @@ function plTick() {
 }
 function plDrawPlayer() {
     if (plX >= 0) {
-        rSetDrawColor(240, 240, 240, 200);
+        canvasRenderer.setDrawColor(240, 240, 240, 200);
         rrFill(plX, plY);
     }
 }
@@ -556,7 +561,7 @@ function baDrawOverlays() {
     if (mCurrentMap !== mWAVE_1_TO_9 && mCurrentMap !== mWAVE10) {
         return;
     }
-    rSetDrawColor(240, 10, 10, 220);
+    canvasRenderer.setDrawColor(240, 10, 10, 220);
     if (mCurrentMap === mWAVE_1_TO_9) {
         rrOutline(18, 37);
     } else {
@@ -564,28 +569,28 @@ function baDrawOverlays() {
     }
     rrOutline(24, 39);
     rrFill(33, 6);
-    rSetDrawColor(10, 10, 240, 220);
+    canvasRenderer.setDrawColor(10, 10, 240, 220);
     if (mCurrentMap === mWAVE_1_TO_9) {
         rrOutline(36, 39);
     } else {
         rrOutline(42, 38);
     }
     rrFill(34, 6);
-    rSetDrawColor(10, 240, 10, 220);
+    canvasRenderer.setDrawColor(10, 240, 10, 220);
     if (mCurrentMap === mWAVE_1_TO_9) {
         rrOutline(42, 37);
     } else {
         rrOutline(36, 39);
     }
     rrFill(35, 6);
-    rSetDrawColor(240, 240, 10, 220);
+    canvasRenderer.setDrawColor(240, 240, 10, 220);
     rrFill(36, 6);
 }
 function baDrawDetails() {
     if (mCurrentMap !== mWAVE_1_TO_9 && mCurrentMap !== mWAVE10) {
         return;
     }
-    rSetDrawColor(160, 82, 45, 255);
+    canvasRenderer.setDrawColor(160, 82, 45, 255);
     rrCone(40, 32);
     rrCone(40, 31);
     rrCone(41, 32);
@@ -613,22 +618,21 @@ function baDrawDetails() {
     if (mCurrentMap === mWAVE10) {
         rrOutlineBig(27, 20, 8, 8);
     }
-    rSetDrawColor(127, 127, 127, 255);
+    canvasRenderer.setDrawColor(127, 127, 127, 255);
     rrFillItem(32, 34);
 }
 function baDrawEntities() {
-    rSetDrawColor(10, 10, 240, 127);
+    canvasRenderer.setDrawColor(10, 10, 240, 127);
     for (let i = 0; i < baRunners.length; ++i) {
         rrFill(baRunners[i].x, baRunners[i].y);
     }
     if (baCollectorX !== -1) {
-        rSetDrawColor(240, 240, 10, 200);
+        canvasRenderer.setDrawColor(240, 240, 10, 200);
         rrFill(baCollectorX, baCollectorY);
     }
 }
 
 var baRunners;
-var baRunnersToRemove;
 var baTickCounter;
 var baRunnersAlive;
 var baRunnersKilled;
@@ -679,17 +683,17 @@ function mGetTileFlag(x, y) {
 function mDrawGrid() {
     for (var xTile = 0; xTile < mWidthTiles; ++xTile) {
         if (xTile % 8 == 7) {
-            rSetDrawColor(0, 0, 0, 72);
+            canvasRenderer.setDrawColor(0, 0, 0, 72);
         } else {
-            rSetDrawColor(0, 0, 0, 48);
+            canvasRenderer.setDrawColor(0, 0, 0, 48);
         }
         rrEastLineBig(xTile, 0, mHeightTiles);
     }
     for (var yTile = 0; yTile < mHeightTiles; ++yTile) {
         if (yTile % 8 == 7) {
-            rSetDrawColor(0, 0, 0, 72);
+            canvasRenderer.setDrawColor(0, 0, 0, 72);
         } else {
-            rSetDrawColor(0, 0, 0, 48);
+            canvasRenderer.setDrawColor(0, 0, 0, 48);
         }
         rrNorthLineBig(0, yTile, mWidthTiles);
     }
@@ -701,51 +705,56 @@ function mDrawItems() {
         let endJ = itemZone.length;
         for (let j = 0; j < endJ; ++j) {
             let item = itemZone[j];
-            rSetDrawColor(item.colorRed, item.colorGreen, item.colorBlue, 127);
+            canvasRenderer.setDrawColor(
+                item.colorRed,
+                item.colorGreen,
+                item.colorBlue,
+                127
+            );
             rrFillItem(item.x, item.y);
         }
     }
 }
 function mDrawMap() {
-    rSetDrawColor(206, 183, 117, 255);
-    rClear();
+    canvasRenderer.setDrawColor(206, 183, 117, 255);
+    canvasRenderer.clear();
     for (let y = 0; y < mHeightTiles; ++y) {
         for (let x = 0; x < mWidthTiles; ++x) {
             let tileFlag = mGetTileFlag(x, y);
             if ((tileFlag & mLOS_FULL_MASK) !== 0) {
-                rSetDrawColor(0, 0, 0, 255);
+                canvasRenderer.setDrawColor(0, 0, 0, 255);
                 rrFillOpaque(x, y);
             } else {
                 if ((tileFlag & mMOVE_FULL_MASK) !== 0) {
-                    rSetDrawColor(127, 127, 127, 255);
+                    canvasRenderer.setDrawColor(127, 127, 127, 255);
                     rrFillOpaque(x, y);
                 }
                 if ((tileFlag & mLOS_EAST_MASK) !== 0) {
-                    rSetDrawColor(0, 0, 0, 255);
+                    canvasRenderer.setDrawColor(0, 0, 0, 255);
                     rrEastLine(x, y);
                 } else if ((tileFlag & mMOVE_EAST_MASK) !== 0) {
-                    rSetDrawColor(127, 127, 127, 255);
+                    canvasRenderer.setDrawColor(127, 127, 127, 255);
                     rrEastLine(x, y);
                 }
                 if ((tileFlag & mLOS_WEST_MASK) !== 0) {
-                    rSetDrawColor(0, 0, 0, 255);
+                    canvasRenderer.setDrawColor(0, 0, 0, 255);
                     rrWestLine(x, y);
                 } else if ((tileFlag & mMOVE_WEST_MASK) !== 0) {
-                    rSetDrawColor(127, 127, 127, 255);
+                    canvasRenderer.setDrawColor(127, 127, 127, 255);
                     rrWestLine(x, y);
                 }
                 if ((tileFlag & mLOS_NORTH_MASK) !== 0) {
-                    rSetDrawColor(0, 0, 0, 255);
+                    canvasRenderer.setDrawColor(0, 0, 0, 255);
                     rrNorthLine(x, y);
                 } else if ((tileFlag & mMOVE_NORTH_MASK) !== 0) {
-                    rSetDrawColor(127, 127, 127, 255);
+                    canvasRenderer.setDrawColor(127, 127, 127, 255);
                     rrNorthLine(x, y);
                 }
                 if ((tileFlag & mLOS_SOUTH_MASK) !== 0) {
-                    rSetDrawColor(0, 0, 0, 255);
+                    canvasRenderer.setDrawColor(0, 0, 0, 255);
                     rrSouthLine(x, y);
                 } else if ((tileFlag & mMOVE_SOUTH_MASK) !== 0) {
-                    rSetDrawColor(127, 127, 127, 255);
+                    canvasRenderer.setDrawColor(127, 127, 127, 255);
                     rrSouthLine(x, y);
                 }
             }
@@ -758,201 +767,95 @@ var mHeightTiles;
 var mItemZones;
 var mItemZonesWidth;
 var mItemZonesHeight;
-//}
-//{ RsRenderer - rr
-function rrInit(tileSize) {
-    rrTileSize = tileSize;
-}
-function rrSetTileSize(size) {
-    rrTileSize = size;
-}
-function rrSetSize(widthTiles, heightTiles) {
-    rrWidthTiles = widthTiles;
-    rrHeightTiles = heightTiles;
-    rResizeCanvas(rrTileSize * rrWidthTiles, rrTileSize * rrHeightTiles);
-}
+
 function rrFillOpaque(x, y) {
-    rSetFilledRect(x * rrTileSize, y * rrTileSize, rrTileSize, rrTileSize);
+    canvasRenderer.setFilledRect(
+        x * Constants.TILE_SIZE,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE,
+        Constants.TILE_SIZE
+    );
 }
 function rrFill(x, y) {
-    rDrawFilledRect(x * rrTileSize, y * rrTileSize, rrTileSize, rrTileSize);
-}
-function rrFillBig(x, y, width, height) {
-    rDrawFilledRect(
-        x * rrTileSize,
-        y * rrTileSize,
-        width * rrTileSize,
-        height * rrTileSize
+    canvasRenderer.drawFilledRect(
+        x * Constants.TILE_SIZE,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE,
+        Constants.TILE_SIZE
     );
 }
 function rrOutline(x, y) {
-    rDrawOutlinedRect(x * rrTileSize, y * rrTileSize, rrTileSize, rrTileSize);
+    canvasRenderer.drawOutlinedRect(
+        x * Constants.TILE_SIZE,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE,
+        Constants.TILE_SIZE
+    );
 }
 function rrOutlineBig(x, y, width, height) {
-    rDrawOutlinedRect(
-        x * rrTileSize,
-        y * rrTileSize,
-        rrTileSize * width,
-        rrTileSize * height
+    canvasRenderer.drawOutlinedRect(
+        x * Constants.TILE_SIZE,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE * width,
+        Constants.TILE_SIZE * height
     );
 }
 function rrWestLine(x, y) {
-    rDrawVerticalLine(x * rrTileSize, y * rrTileSize, rrTileSize);
-}
-function rrWestLineBig(x, y, length) {
-    rDrawHorizontalLine(x * rrTileSize, y * rrTileSize, rrTileSize * length);
+    canvasRenderer.drawVerticalLine(
+        x * Constants.TILE_SIZE,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE
+    );
 }
 function rrEastLine(x, y) {
-    rDrawVerticalLine((x + 1) * rrTileSize - 1, y * rrTileSize, rrTileSize);
+    canvasRenderer.drawVerticalLine(
+        (x + 1) * Constants.TILE_SIZE - 1,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE
+    );
 }
 function rrEastLineBig(x, y, length) {
-    rDrawVerticalLine(
-        (x + 1) * rrTileSize - 1,
-        y * rrTileSize,
-        rrTileSize * length
+    canvasRenderer.drawVerticalLine(
+        (x + 1) * Constants.TILE_SIZE - 1,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE * length
     );
 }
 function rrSouthLine(x, y) {
-    rDrawHorizontalLine(x * rrTileSize, y * rrTileSize, rrTileSize);
-}
-function rrSouthLineBig(x, y, length) {
-    rDrawHorizontalLine(x * rrTileSize, y * rrTileSize, rrTileSize * length);
+    canvasRenderer.drawHorizontalLine(
+        x * Constants.TILE_SIZE,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE
+    );
 }
 function rrNorthLine(x, y) {
-    rDrawHorizontalLine(x * rrTileSize, (y + 1) * rrTileSize - 1, rrTileSize);
+    canvasRenderer.drawHorizontalLine(
+        x * Constants.TILE_SIZE,
+        (y + 1) * Constants.TILE_SIZE - 1,
+        Constants.TILE_SIZE
+    );
 }
 function rrNorthLineBig(x, y, length) {
-    rDrawHorizontalLine(
-        x * rrTileSize,
-        (y + 1) * rrTileSize - 1,
-        rrTileSize * length
+    canvasRenderer.drawHorizontalLine(
+        x * Constants.TILE_SIZE,
+        (y + 1) * Constants.TILE_SIZE - 1,
+        Constants.TILE_SIZE * length
     );
 }
 function rrCone(x, y) {
-    rDrawCone(x * rrTileSize, y * rrTileSize, rrTileSize);
+    canvasRenderer.drawCone(
+        x * Constants.TILE_SIZE,
+        y * Constants.TILE_SIZE,
+        Constants.TILE_SIZE
+    );
 }
 function rrFillItem(x, y) {
-    let padding = rrTileSize >>> 2;
-    let size = rrTileSize - 2 * padding;
-    rDrawFilledRect(
-        x * rrTileSize + padding,
-        y * rrTileSize + padding,
+    let padding = Constants.TILE_SIZE >>> 2;
+    let size = Constants.TILE_SIZE - 2 * padding;
+    canvasRenderer.drawFilledRect(
+        x * Constants.TILE_SIZE + padding,
+        y * Constants.TILE_SIZE + padding,
         size,
         size
     );
 }
-var rrTileSize;
-//}
-//{ Renderer - r
-const rPIXEL_ALPHA = 255 << 24;
-function rInit(canvas, width, height) {
-    rCanvas = canvas;
-    rContext = canvas.getContext('2d');
-    rResizeCanvas(width, height);
-    rSetDrawColor(255, 255, 255, 255);
-}
-function rResizeCanvas(width, height) {
-    rCanvas.width = width;
-    rCanvas.height = height;
-    rCanvasWidth = width;
-    rCanvasHeight = height;
-    rCanvasYFixOffset = (rCanvasHeight - 1) * rCanvasWidth;
-    rImageData = rContext.createImageData(width, height);
-    rPixels = new ArrayBuffer(rImageData.data.length);
-    rPixels8 = new Uint8ClampedArray(rPixels);
-    rPixels32 = new Uint32Array(rPixels);
-}
-function rSetDrawColor(r, g, b, a) {
-    rDrawColorRB = r | (b << 16);
-    rDrawColorG = rPIXEL_ALPHA | (g << 8);
-    rDrawColor = rDrawColorRB | rDrawColorG;
-    rDrawColorA = a + 1;
-}
-function rClear() {
-    let endI = rPixels32.length;
-    for (let i = 0; i < endI; ++i) {
-        rPixels32[i] = rDrawColor;
-    }
-}
-function rPresent() {
-    rImageData.data.set(rPixels8);
-    rContext.putImageData(rImageData, 0, 0);
-}
-function rDrawPixel(i) {
-    let color = rPixels32[i];
-    let oldRB = color & 0xff00ff;
-    let oldAG = color & 0xff00ff00;
-    let rb = (oldRB + ((rDrawColorA * (rDrawColorRB - oldRB)) >> 8)) & 0xff00ff;
-    let g = (oldAG + ((rDrawColorA * (rDrawColorG - oldAG)) >> 8)) & 0xff00ff00;
-    rPixels32[i] = rb | g;
-}
-function rDrawHorizontalLine(x, y, length) {
-    let i = rXYToI(x, y);
-    let endI = i + length;
-    for (; i < endI; ++i) {
-        rDrawPixel(i);
-    }
-}
-function rDrawVerticalLine(x, y, length) {
-    let i = rXYToI(x, y);
-    let endI = i - length * rCanvasWidth;
-    for (; i > endI; i -= rCanvasWidth) {
-        rDrawPixel(i);
-    }
-}
-function rSetFilledRect(x, y, width, height) {
-    let i = rXYToI(x, y);
-    let rowDelta = width + rCanvasWidth;
-    let endYI = i - height * rCanvasWidth;
-    while (i > endYI) {
-        let endXI = i + width;
-        for (; i < endXI; ++i) {
-            rPixels32[i] = rDrawColor;
-        }
-        i -= rowDelta;
-    }
-}
-function rDrawFilledRect(x, y, width, height) {
-    let i = rXYToI(x, y);
-    let rowDelta = width + rCanvasWidth;
-    let endYI = i - height * rCanvasWidth;
-    while (i > endYI) {
-        let endXI = i + width;
-        for (; i < endXI; ++i) {
-            rDrawPixel(i);
-        }
-        i -= rowDelta;
-    }
-}
-function rDrawOutlinedRect(x, y, width, height) {
-    rDrawHorizontalLine(x, y, width);
-    rDrawHorizontalLine(x, y + height - 1, width);
-    rDrawVerticalLine(x, y + 1, height - 2);
-    rDrawVerticalLine(x + width - 1, y + 1, height - 2);
-}
-function rDrawCone(x, y, width) {
-    // Not optimised to use i yet
-    let lastX = x + width - 1;
-    let endI = (width >>> 1) + (width & 1);
-    for (let i = 0; i < endI; ++i) {
-        rDrawPixel(rXYToI(x + i, y));
-        rDrawPixel(rXYToI(lastX - i, y));
-        ++y;
-    }
-}
-function rXYToI(x, y) {
-    return rCanvasYFixOffset + x - y * rCanvasWidth;
-}
-var rCanvas;
-var rCanvasWidth;
-var rCanvasHeight;
-var rCanvasYFixOffset;
-var rContext;
-var rImageData;
-var rPixels;
-var rPixels8;
-var rPixels32;
-var rDrawColor;
-var rDrawColorRB;
-var rDrawColorG;
-var rDrawColorA;

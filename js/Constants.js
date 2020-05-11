@@ -7,5 +7,5 @@ export const WEST_TRAP_Y = 25;
 export const EAST_TRAP_X = 45;
 export const EAST_TRAP_Y = 26;
 
-// baTileBlocksPenance
-// mItemZonesWidth
+export const PIXEL_ALPHA = 255 << 24;
+export const TILE_SIZE = 12;
