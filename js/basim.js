@@ -138,11 +138,11 @@ function simParseMovementsInput() {
 }
 function simWindowOnKeyDown(e) {
     if (simIsRunning) {
-        if (e.key === 'r') {
+        if (e.key === 'r' || e.key === 'R') {
             mAddItem(new Food(plX, plY, true));
-        } else if (e.key === 'w') {
+        } else if (e.key === 'w' || e.key === 'W') {
             mAddItem(new Food(plX, plY, false));
-        } else if (e.key === 'e') {
+        } else if (e.key === 'e' || e.key === 'E') {
             let itemZone = mGetItemZone(plX >>> 3, plY >>> 3);
             for (let i = 0; i < itemZone.length; ++i) {
                 let item = itemZone[i];
