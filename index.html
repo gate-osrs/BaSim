@@ -3,37 +3,61 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- Bootstrap CSS -->
+        <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+            integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+            crossorigin="anonymous"
+        />
+        <link rel="stylesheet" type="text/css" href="main.css" />
+
         <title>Ba simulator</title>
+
         <script type="module" src="js/basim.js"></script>
     </head>
     <body>
-        Defender level:
-        <select id="deflevelselect">
-            <option value="4">Level 1</option>
-            <option value="5" selected>Level 2-5</option> </select
-        ><br />
-        Wave:
-        <select id="waveselect">
-            <option value="1">Wave 1</option>
-            <option value="2">Wave 2</option>
-            <option value="3">Wave 3</option>
-            <option value="4">Wave 4</option>
-            <option value="5">Wave 5</option>
-            <option value="6">Wave 6</option>
-            <option value="7">Wave 7</option>
-            <option value="8">Wave 8</option>
-            <option value="9">Wave 9</option>
-            <option value="10">Wave 10</option> </select
-        ><br />
-        Runner movements: <input id="runnermovements" type="text" /><br />
-        <button id="wavestart"></button> Tick count: <span id="tickcount"></span
-        ><br />
-        <canvas id="basimcanvas"></canvas><br />
-        <b>space</b> starts or stops the wave.<br />
-        <b>left-click</b> moves the player.<br />
-        <b>right-click</b> places a collector.<br />
-        <b>r</b> drops a right food.<br />
-        <b>w</b> drops a wrong food.<br />
-        <b>e</b> picks up a food.
+        <div class="container-fluid">
+            <div class="form-group">
+                <label for="deflevelselect">Defender level:</label>
+                <select id="deflevelselect" class="form-control">
+                    <option value="4">Level 1</option>
+                    <option value="5" selected>Level 2-5</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="waveselect">Wave:</label>
+                <select id="waveselect" class="form-control">
+                    <option value="1">Wave 1</option>
+                    <option value="2">Wave 2</option>
+                    <option value="3">Wave 3</option>
+                    <option value="4">Wave 4</option>
+                    <option value="5">Wave 5</option>
+                    <option value="6">Wave 6</option>
+                    <option value="7">Wave 7</option>
+                    <option value="8">Wave 8</option>
+                    <option value="9">Wave 9</option>
+                    <option value="10">Wave 10</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="runnermovements">Runner movements:</label>
+                <input id="runnermovements" type="text" class="form-control" />
+            </div>
+            <canvas id="basimcanvas" style="float: left;"></canvas>
+            <div class="controls">
+                <button id="wavestart" class="btn btn-primary"></button>
+                <br />
+                Tick count: <span id="tickcount"></span>
+                <p class="bg-blue">
+                    <b>space</b> starts or stops the wave.<br />
+                    <b>left-click</b> moves the player.<br />
+                    <b>right-click</b> places a collector.<br />
+                    <b>r</b> drops a right food.<br />
+                    <b>w</b> drops a wrong food.<br />
+                    <b>e</b> picks up a food.
+                </p>
+            </div>
+        </div>
     </body>
 </html>

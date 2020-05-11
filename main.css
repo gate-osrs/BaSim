@@ -1,0 +1,12 @@
+.controls {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.bg-blue {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: rgba(0, 0, 255, 0.3);
+}

@@ -185,7 +185,7 @@ export class Runner extends Entity {
                 this.x === this.foodTarget.x &&
                 this.y === this.foodTarget.y
             ) {
-                if (this.foodTarget.isGood) {
+                if (this.foodTarget.good) {
                     this.print('Chomp, chomp.');
                     if (this.isNearTrap()) {
                         this.isDying = true;

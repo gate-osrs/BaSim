@@ -1,5 +1,6 @@
 import { mWAVE_1_TO_9, mWAVE10 } from './MapConstants.js';
 import { Runner } from './Runner.js';
+import { Food } from './Food.js';
 import { setPlayerPosition, addItem, resetMap } from './MapUtils.js';
 import { Canvas } from './Canvas.js';
 import * as Constants from './Constants.js';
@@ -16,7 +17,6 @@ var canvasRenderer;
 function simInit() {
     window.settings = {
         wave: 1,
-        defenderLevel: 5,
     };
     let canvas = document.getElementById(HTML_CANVAS);
     simMovementsInput = document.getElementById(HTML_RUNNER_MOVEMENTS);
@@ -32,7 +32,6 @@ function simInit() {
     simDefLevelSelect = document.getElementById(HTML_DEF_LEVEL_SELECT);
     simDefLevelSelect.onchange = simDefLevelSelectOnChange;
     simTickCountSpan = document.getElementById(HTML_TICK_COUNT);
-    // rInit(canvas, 64 * 12, 48 * 12);
     canvasRenderer = new Canvas(canvas, 64 * 12, 48 * 12);
     mInit(mWAVE_1_TO_9, 64, 48);
     Runner.setSniffDistance(5);
@@ -140,9 +139,9 @@ function simParseMovementsInput() {
 function simWindowOnKeyDown(e) {
     if (simIsRunning) {
         if (e.key === 'r') {
-            mAddItem(new fFood(plX, plY, true));
+            mAddItem(new Food(plX, plY, true));
         } else if (e.key === 'w') {
-            mAddItem(new fFood(plX, plY, false));
+            mAddItem(new Food(plX, plY, false));
         } else if (e.key === 'e') {
             let itemZone = mGetItemZone(plX >>> 3, plY >>> 3);
             for (let i = 0; i < itemZone.length; ++i) {
@@ -188,7 +187,6 @@ function simWaveSelectOnChange(e) {
 function simDefLevelSelectOnChange(e) {
     mResetMap();
     simReset();
-    window.defenderLevel = Number(simDefLevelSelect.value);
     Runner.setSniffDistance(Number(simDefLevelSelect.value));
 }
 function simTick() {
@@ -435,21 +433,7 @@ var plPathQueueX;
 var plPathQueueY;
 var plX;
 var plY;
-//}
-//{ Food - f
-function fFood(x, y, isGood) {
-    this.x = x;
-    this.y = y;
-    this.isGood = isGood;
-    if (this.isGood) {
-        this.colorRed = 0;
-        this.colorGreen = 255;
-    } else {
-        this.colorRed = 255;
-        this.colorGreen = 0;
-    }
-    this.colorBlue = 0;
-}
+
 //}
 //{ RunnerRNG - rng
 const rngSOUTH = 0;
